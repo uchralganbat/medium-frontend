@@ -1,86 +1,70 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
+import Head from 'next/head';
+import Link from 'next/link';
+import Header from '../components/Header';
+import Banner from '../components/Banner';
+import { Article } from '../typing';
 
-const Home: NextPage = () => {
+interface Props {
+  articles: [Article]
+}
+
+export default function Home ({ articles }: Props){
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-2">
+    <div className='divide-y divide-black'>
       <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>Medium</title>
+        <link rel="icon" href="/iconmonstr-medium-1.svg" />
       </Head>
-
-      <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
-        <h1 className="text-6xl font-bold">
-          Welcome to{' '}
-          <a className="text-blue-600" href="https://nextjs.org">
-            Next.js!
-          </a>
-        </h1>
-
-        <p className="mt-3 text-2xl">
-          Get started by editing{' '}
-          <code className="rounded-md bg-gray-100 p-3 font-mono text-lg">
-            pages/index.tsx
-          </code>
-        </p>
-
-        <div className="mt-6 flex max-w-4xl flex-wrap items-center justify-around sm:w-full">
-          <a
-            href="https://nextjs.org/docs"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Documentation &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Find in-depth information about Next.js features and API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Learn &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Learn about Next.js in an interactive course with quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Examples &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Discover and deploy boilerplate example Next.js projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Deploy &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className="flex h-24 w-full items-center justify-center border-t">
-        <a
-          className="flex items-center justify-center gap-2"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-        </a>
-      </footer>
+      <Header />
+      <Banner />
+      <div>
+        <div className='max-w-7xl mx-auto'>
+          {articles.map(article => (
+            <div className='grid grid-cols-2' key={article._id}>
+              <div className='pl-10 py-7 flex'>
+                <div className='w-80 h-44'>
+                  <div className='flex items-center space-x-1'>
+                    <img 
+                      className='rounded-full h-6 w-6 cursor-pointer'
+                      src='https://i.stack.imgur.com/frlIf.png'
+                    />
+                    <h1 className='cursor-pointer font-medium'>{article.author.username}</h1>
+                  </div>
+                  <div>
+                    <Link href='/'>
+                      <div>
+                        <h1 className='text-3xl font-semibold text-slate-900 pt-3 cursor-pointer'>
+                          {article.title}
+                        </h1>
+                        <h1 className='text-gray-600 cursor-pointer'>{article.description}</h1>
+                      </div>
+                    </Link>
+                    <div className='text-gray-600 text-xs pt-5 flex space-x-2'>
+                      <h1>{article.createdAt.split('T')[0]}</h1>
+                      <h1>{Math.floor(article.text.length/200)} min read</h1>
+                    </div>
+                  </div>
+                </div>
+                <Link href='/'>
+                  <img
+                    className='h-44 w-44 cursor-pointer' 
+                    src={article.feature_img[0]}
+                  />
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div> 
+      </div>
     </div>
   )
 }
 
-export default Home
+export async function getServerSideProps() {
+  const res = await fetch('http://localhost:4000/articles');
+  const articles = await res.json();
+  return {
+    props: { articles },
+  }
+}
